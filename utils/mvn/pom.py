@@ -178,10 +178,15 @@ class PomProjectGeneratorThread(threading.Thread):
                 cp_threads.append(cp_thread)
                 cp_thread.start()
                 # add pom_path/target/classes to classpath
-                project['settings'] = { 'sublimejava_classpath': [
+                project['settings'] = {
+                    'sublimejava_classpath': [
                         os.path.join(project['folders'][0]['path'], 'target', 'classes'),
                         os.path.join(project['folders'][0]['path'], 'target', 'test-classes')
-                    ] }
+                    ],
+                    'sublimejava_srcpath': [
+                        os.path.join(project['folders'][0]['path'], 'src', 'main', 'java'),
+                        os.path.join(project['folders'][0]['path'], 'src', 'test', 'java'),
+                    ]}
                 if len(cp_threads) == max_cp_threads:
                     for cp_thread in cp_threads:
                         cp_thread.join()
@@ -223,7 +228,12 @@ class PomProjectGeneratorThread(threading.Thread):
             self.merged_classpath.update(cp_thread.classpath)
 
         if not self.project_per_pom:
-            self.result['settings'] = { 'sublimejava_classpath': list(self.merged_classpath) }
+            self.result['settings'] = {
+                'sublimejava_classpath': list(self.merged_classpath),
+                'sublimejava_srcpath': [
+                    os.path.join(project_entry['path'], 'src', 'main', 'java'),
+                    os.path.join(project_entry['path'], 'src', 'test', 'java')
+                ]}
         else:
             for idx in range(len(self.result)):
                 self.result[idx]['settings']['sublimejava_classpath'].extend(finished_cp_threads[idx].classpath)
